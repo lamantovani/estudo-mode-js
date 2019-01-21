@@ -3,10 +3,10 @@
 //     mongo -u admin -p nimda --authenticationDatabase herois
 
 // mudando o contexto para uma database, caso não esxistir ele cria.
-use herois;
+//use herois;
 
 // mostra tabelas (coleções)
-show collections;
+//show collections;
 
 db.herois.insert({
     nome: 'Flash',

@@ -2,6 +2,12 @@ const assert = require('assert')
 const api = require('./../api')
 
 let app = {}
+
+const MOCK_HEROI_CADASTRAR = {
+    nome: 'Chapolin Colorado',
+    poder: 'Mareta bionica'
+}
+
 describe('Suite de testes da API Heros', function () {
     this.beforeAll(async () => {
         app = await api
@@ -29,7 +35,7 @@ describe('Suite de testes da API Heros', function () {
 
         const dados = JSON.parse(result.payload)
         const statusCode = result.statusCode
-        
+
         assert.deepEqual(statusCode, 200)
         assert.ok(dados.length === TAMANHO_LIMITE)
     })
@@ -41,14 +47,25 @@ describe('Suite de testes da API Heros', function () {
             url: `/herois?skip=0&limit=${TAMANHO_LIMITE}`
         })
 
-        assert.deepEqual(result.payload, 'Erro interno do servidor')
-        
+        const errorResult = { 
+            "statusCode": 400,
+            "error": "Bad Request",
+            "message": "child \"limit\" fails because [\"limit\" must be a number]",
+            "validation": {
+                "source": "query",
+                "keys": ["limit"]
+            } 
+        }
+
+        assert.deepEqual(result.statusCode, 400)
+        assert.deepEqual(result.payload, JSON.stringify(errorResult))
+
     })
 
-    it('listar /herois - deve filtrar um item', async () => {
+    it('listar GET - /herois - deve filtrar um item', async () => {
 
         const NAME = 'Homem Aranha-1548243714347'
-        
+
         const result = await app.inject({
             method: 'GET',
             url: `/herois?skip=0&limit=1000&nome=${NAME}`
@@ -56,9 +73,29 @@ describe('Suite de testes da API Heros', function () {
 
         const dados = JSON.parse(result.payload)
         const statusCode = result.statusCode
-        
+
         assert.deepEqual(statusCode, 200)
         assert.deepEqual(dados[0].nome, NAME)
+    })
+
+    it('cadastrar POST - /herois', async () => {
+
+        const result = await app.inject({
+            method: 'POST',
+            url: '/herois',
+            payload: MOCK_HEROI_CADASTRAR
+        })
+
+        const statusCode = result.statusCode
+        const {
+            message,
+            _id
+        } = JSON.parse(result.payload)
+
+        assert.ok(statusCode === 200)
+        assert.notStrictEqual(_id, undefined)
+        assert.deepEqual(message, 'Heroi cadastrado com sucesso!')
+
     })
 
 })

@@ -8,7 +8,7 @@ const { join } = require("path");
 const { ok } = require("assert");
 
 const env = process.env.NODE_ENV || "dev";
-ok(env === "prod" || env === "dev", "a env é invalida, ou dev ou prod");
+ok(env === "production" || env === "dev", "a env é invalida, ou dev ou production");
 
 const configPath = join(__dirname, "./../config", `.env.${env}`);
 
@@ -32,6 +32,8 @@ const Inert = require("inert");
 
 const HapiJwt = require("hapi-auth-jwt2");
 const JWT_SECRET = process.env.JWT_KEY;
+
+const UtilRoutes = require('./routes/utilRoutes')
 
 const app = new Hapi.Server({
   port: process.env.PORT
@@ -101,10 +103,8 @@ async function main() {
 
   app.route([
     ...mapRoutes(new HeroRoute(context), HeroRoute.methods()),
-    ...mapRoutes(
-      new AuthRoute(JWT_SECRET, contextPostgres),
-      AuthRoute.methods()
-    )
+    ...mapRoutes(new AuthRoute(JWT_SECRET, contextPostgres), AuthRoute.methods()),
+    ...mapRoutes(new UtilRoutes(), UtilRoutes.methods())
   ]);
 
   await app.start();
